@@ -1,6 +1,8 @@
 import requests
 import argparse
+from pathlib import Path
 from bs4 import BeautifulSoup
+from urllib.parse import urljoin
 
 
 def get_object_urls(url: str) -> list[str]:
@@ -12,43 +14,67 @@ def get_object_urls(url: str) -> list[str]:
     return [link["href"] for link in links]
 
 
-def download_file(filename: str, url: str) -> None:
-    if not filename.endswith("/"):
-        file_url = url + "/" + filename
+def download_file(filename: str,
+                  url: str,
+                  destination: Path | None)-> None:
+
+        file_url = urljoin(url, filename)
         response = requests.get(file_url)
         response.raise_for_status()
 
-        with open(filename, "wb") as f:
-            f.write(response.content)
-
-    if filename.endswith("/"):
-        response = requests.get(url + "/" + filename)
-        response.raise_for_status()
-        html = response.text
-        soup = BeautifulSoup(html, "html.parser")
-        links = soup.find_all("a")
-
-        sub_folders = []
-        files = []
-
-        for link in links:
-            if link["href"].startswith("/"):
-                continue
-
-            if link["href"].endswith("/"):
-                sub_folders.append(link["href"])
-            else:
-                files.append(link["href"])
-
-        for file in files:
-            file_url = url + "/" + filename + file
-            response = requests.get(file_url)
-            response.raise_for_status()
-            with open(file, "wb") as f:
+        if destination == None:
+             with open(filename, "wb") as f:
+                  f.write(response.content)
+        else:
+            with open(destination / filename, "wb") as f:
                 f.write(response.content)
-    print("Done!")
-    if sub_folders != []:
-        print(f"Found the folders: {sub_folders}") 
+
+def download_folder(folder_name: str,
+                   url: str,
+                   destination: Path,
+                   recurse: bool =False) -> None:
+     folder_url = urljoin(url, folder_name)
+     response = requests.get(folder_url)
+     response.raise_for_status()
+     html = response.text
+     soup = BeautifulSoup(html, "html.parser")
+     links = soup.find_all("a")
+
+     files = [link["href"] for link in links if not link["href"].endswith("/")]
+     sub_folders = [link["href"] for link in links if link["href"].endswith("/")]
+
+     if files == [] and sub_folders == []:
+          print(f"{folder_name} is empty!")
+
+     else:
+        for file in files:             
+             download_file(file,
+                           folder_url,
+                           destination)
+
+        if recurse:
+            for folder in sub_folders:
+                download_folder(folder,
+                               folder_url,
+                               destination,
+                               recurse=True)      
+
+     
+def download(object_name: str,
+             url: str,
+             destination: Path,
+             recurse: bool=False) -> None:
+    if object_name.endswith("/"):
+        download_folder(object_name,
+                        url,
+                        destination,
+                        recurse)
+    else:
+        download_file(object_name,
+                      url,
+                      destination)
+
+    print("Done!") 
 
 
 def main(ip: str, port: int) -> None:
