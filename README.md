@@ -1,10 +1,10 @@
 # SwiftFetch
 
-SwiftFetch is a lightweight command-line tool for downloading PDF files from an HTTP directory listing, such as one served by Python's `uploadserver`.
+SwiftFetch is a lightweight command-line tool for downloading files from an HTTP directory listing, such as one served by Python's `uploadserver`.
 
 ## Features
 
-- Download all PDF files from a local HTTP file server.
+- Download all files from a local HTTP file server.
 - Simple command-line interface.
 - Lightweight and easy to use.
 
@@ -42,7 +42,7 @@ Then run:
 swiftfetch 192.168.0.118 3000
 ```
 
-All PDF files will be downloaded to the current working directory.
+All files can be downloaded to the directory of your choice. 
 
 ## Requirements
 
@@ -53,9 +53,9 @@ All PDF files will be downloaded to the current working directory.
 ## Roadmap
 
 - [x] Download PDF files
-- [ ] Custom download directory
-- [ ] Support any file extension
-- [ ] Download all file types
+- [x] Custom download directory
+- [x] Support any file extension
+- [x] Download all file types
 - [ ] Multithreaded downloads
 - [ ] Progress bar
 - [ ] Recursive directory downloads
