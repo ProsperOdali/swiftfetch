@@ -81,7 +81,7 @@ def main(ip: str, port: int) -> None:
     url = f"http://{ip}:{port}"
     files = get_object_urls(url)
     for filename in files:
-        download_file(filename, url)
+        download(filename, url)
 
 def cli():
     parser = argparse.ArgumentParser(
